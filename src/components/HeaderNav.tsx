@@ -18,10 +18,9 @@ interface HeaderNavProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   activeTournament: Tournament | null;
-  onLogout: () => void;
 }
 
-export default function HeaderNav({ user, activeTab, setActiveTab, activeTournament, onLogout }: HeaderNavProps) {
+export default function HeaderNav({ user, activeTab, setActiveTab, activeTournament }: HeaderNavProps) {
   if (!user) return null;
 
   const tabs = [
@@ -135,14 +134,6 @@ export default function HeaderNav({ user, activeTab, setActiveTab, activeTournam
             title="OBS Broadcast Output Preview"
           >
             <Radio className="w-5 h-5" />
-          </button>
-          <button
-            onClick={onLogout}
-            id="btn-logout"
-            className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-white/5 border border-transparent transition-colors"
-            title="Sign Out"
-          >
-            <LogOut className="w-5 h-5" />
           </button>
         </div>
       </div>
