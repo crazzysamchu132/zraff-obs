@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function hasRole(role) {
+      return isAuthenticated() && 
+             exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+    }
+    
+    function isAdmin() {
+      return hasRole('admin');
+    }
+    
+    function isManager() {
+      return hasRole('admin') || hasRole('manager');
+    }
+    
+    function isOperator() {
+      return hasRole('admin') || hasRole('manager') || hasRole('operator');
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if true; // Let viewers see names/profiles
+      allow create: if true; // Allow signup
+      allow update, delete: if (isAuthenticated() && request.auth.uid == userId) || isAdmin();
+    }
+
+    // Tournaments Collection
+    match /tournaments/{tournamentId} {
+      allow read: if true;
+      allow create, update: if isManager();
+      allow delete: if isAdmin();
+    }
+
+    // Teams Collection
+    match /teams/{teamId} {
+      allow read: if true;
+      allow create, update: if isManager();
+      allow delete: if isAdmin() || isManager();
+    }
+
+    // Groups Collection
+    match /groups/{groupId} {
+      allow read: if true;
+      allow create, update: if isManager();
+      allow delete: if isAdmin();
+    }
+
+    // Fixtures / Matches Collection
+    match /fixtures/{fixtureId} {
+      allow read: if true;
+      allow create, update: if isOperator();
+      allow delete: if isManager();
+    }
+
+    // Settings Collection
+    match /settings/{settingsId} {
+      allow read: if true;
+      allow write: if isOperator();
+    }
+
+    // Graphics Overlay Control Collection
+    match /graphics/{graphicsId} {
+      allow read: if true;
+      allow write: if isOperator();
+    }
+
+    // System Logs Collection
+    match /system_logs/{logId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+  }
+}

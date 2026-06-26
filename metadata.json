@@ -1,0 +1,6 @@
+{
+  "name": "z-raff champ",
+  "description": "Professional football tournament management and live OBS broadcast graphics system with automatic group allocation, automatic fixture generation, Firebase authentication, and real-time operator-driven broadcast overlays.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
