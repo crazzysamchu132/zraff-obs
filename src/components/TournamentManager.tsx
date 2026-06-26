@@ -93,9 +93,9 @@ export default function TournamentManager({ currentUser, activeTournament, setAc
       setShowAddForm(false);
       resetForm();
       fetchTournaments();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Error creating tournament');
+      alert(`Error creating tournament. Error: ${err?.message || err}`);
     }
   };
 
@@ -132,9 +132,9 @@ export default function TournamentManager({ currentUser, activeTournament, setAc
       setEditingId(null);
       resetForm();
       fetchTournaments();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Error updating tournament');
+      alert(`Error updating tournament. Error: ${err?.message || err}`);
     }
   };
 
@@ -159,9 +159,9 @@ export default function TournamentManager({ currentUser, activeTournament, setAc
       });
 
       fetchTournaments();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Error deleting tournament');
+      alert(`Error deleting tournament. Error: ${err?.message || err}`);
     }
   };
 

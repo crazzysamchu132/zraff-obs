@@ -139,9 +139,9 @@ export default function GroupDrawManager({ currentUser, activeTournament }: Grou
       });
 
       fetchTeamsAndGroups();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to assign team to group.');
+      alert(`Failed to assign team to group. Error: ${err?.message || err}`);
     }
   };
 

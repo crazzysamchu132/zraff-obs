@@ -130,9 +130,9 @@ export default function TeamManager({ currentUser, activeTournament }: TeamManag
       setShowAddForm(false);
       resetForm();
       fetchTeams();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to persist team record.');
+      alert(`Failed to persist team record. Error: ${err?.message || err}`);
     }
   };
 
@@ -170,9 +170,9 @@ export default function TeamManager({ currentUser, activeTournament }: TeamManag
       });
 
       fetchTeams();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Failed to delete team.');
+      alert(`Failed to delete team. Error: ${err?.message || err}`);
     }
   };
 
