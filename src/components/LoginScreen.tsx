@@ -8,7 +8,7 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import { Trophy, Mail, Lock, User, Phone, CheckCircle, ArrowRight, Shield } from 'lucide-react';
+import { Trophy, Mail, Lock, User, Phone, CheckCircle, ArrowRight, Shield, Copy, ExternalLink, Globe, Check } from 'lucide-react';
 
 interface LoginScreenProps {
   onAuthSuccess: (userId: string) => void;
@@ -27,6 +27,7 @@ export default function LoginScreen({ onAuthSuccess }: LoginScreenProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
@@ -191,12 +192,71 @@ export default function LoginScreen({ onAuthSuccess }: LoginScreenProps) {
           </p>
         </div>
 
-        {error && (
+        {error && (error.toLowerCase().includes('unauthorized-domain') || error.toLowerCase().includes('unauthorized_domain')) ? (
+          <div className="p-5 mb-6 bg-amber-500/10 border border-amber-500/20 rounded-xl text-amber-300 text-sm space-y-4" id="auth-unauthorized-domain-alert">
+            <div className="flex items-start space-x-2.5">
+              <span className="text-xl shrink-0">🔒</span>
+              <div>
+                <h4 className="font-bold text-amber-400 text-base font-display">Firebase Domain Authorization Restriction</h4>
+                <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  You are currently accessing this app on <code className="font-mono text-yellow-400 bg-black/40 px-1.5 py-0.5 rounded">{window.location.hostname}</code>. 
+                  Because the Firebase database for this app was provisioned under the <strong className="text-white">AI Studio Starter Tier</strong>, permissions are restricted and settings are locked (which is why the <em>"Add domain"</em> option is missing for editors).
+                </p>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-3 space-y-3">
+              <span className="text-xs font-semibold text-slate-200 block uppercase tracking-wider font-mono">Two ways to solve this:</span>
+              
+              {/* Solution 1 */}
+              <div className="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                <span className="text-xs font-bold text-yellow-500 block">Solution 1: Use the pre-configured official URLs</span>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Google Auth is fully configured and authorized for these official runtime preview links. Simply open the application using one of these links instead:
+                </p>
+                <div className="space-y-1.5 pt-1">
+                  <a 
+                    href="https://ais-pre-tiiri2gcte7eqmftdq3edv-896918452456.asia-southeast1.run.app" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="flex items-center justify-between p-2 bg-yellow-500/5 hover:bg-yellow-500/10 border border-yellow-500/15 rounded-lg text-yellow-400 text-xs transition"
+                  >
+                    <span className="truncate font-mono">ais-pre-tiiri2gcte7eqmftdq3edv-...</span>
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                  </a>
+                  <a 
+                    href="https://ais-dev-tiiri2gcte7eqmftdq3edv-896918452456.asia-southeast1.run.app" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="flex items-center justify-between p-2 bg-yellow-500/5 hover:bg-yellow-500/10 border border-yellow-500/15 rounded-lg text-yellow-400 text-xs transition"
+                  >
+                    <span className="truncate font-mono">ais-dev-tiiri2gcte7eqmftdq3edv-...</span>
+                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                  </a>
+                </div>
+              </div>
+
+              {/* Solution 2 */}
+              <div className="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                <span className="text-xs font-bold text-yellow-500 block">Solution 2: Connect your own Firebase project (For Cloudflare Pages / Custom Domains)</span>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  If you want to host this application on your own website, Cloudflare Pages, or locally, you can easily connect a free Firebase project:
+                </p>
+                <ol className="list-decimal text-[11px] text-slate-400 space-y-1.5 pl-4 mt-1 leading-normal">
+                  <li>Go to <a href="https://console.firebase.google.com" target="_blank" rel="noopener noreferrer" className="text-yellow-500 hover:underline inline-flex items-center space-x-0.5"><span>Firebase Console</span><ExternalLink className="w-2.5 h-2.5 inline" /></a> and click <strong className="text-slate-300">Add project</strong>.</li>
+                  <li>Go to <strong className="text-slate-300">Build &gt; Authentication</strong>, click Get Started, and enable <strong className="text-slate-300">Google</strong> as a sign-in provider.</li>
+                  <li>Under Authentication Settings, you will now see the <strong className="text-slate-300">Add domain</strong> button. Add your hosting domain (<code className="font-mono text-yellow-400 bg-black/40 px-1 py-0.5 rounded">{window.location.hostname}</code>) to the list.</li>
+                  <li>Copy your project's Web App configuration keys and add them as environment variables (<code className="font-mono text-slate-300 text-[10px]">VITE_FIREBASE_API_KEY</code>, etc.) in your deployment dashboard!</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        ) : error ? (
           <div className="p-4 mb-6 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-start space-x-2" id="auth-error-alert">
             <span>⚠️</span>
             <span>{error}</span>
           </div>
-        )}
+        ) : null}
 
         {successMsg && (
           <div className="p-4 mb-6 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm flex items-start space-x-2" id="auth-success-alert">

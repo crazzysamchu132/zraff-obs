@@ -13,22 +13,24 @@ import {
   browserLocalPersistence 
 } from 'firebase/auth';
 
-// Configuration loaded directly from firebase-applet-config.json for bulletproof reliability
+// Configuration loaded directly from firebase-applet-config.json for bulletproof reliability, with optional support for custom Firebase overrides
+const metaEnv = (import.meta as any).env || {};
+
 const firebaseConfig = {
-  projectId: "amiable-card-6wrl4",
-  appId: "1:565471010242:web:dea73a69f8d8d8aa624a5b",
-  apiKey: "AIzaSyDMEPAYEBCpNoAwyf3Uy9xIRyIq8zzctUQ",
-  authDomain: "amiable-card-6wrl4.firebaseapp.com",
-  storageBucket: "amiable-card-6wrl4.firebasestorage.app",
-  messagingSenderId: "565471010242"
+  apiKey: metaEnv.VITE_FIREBASE_API_KEY || "AIzaSyDMEPAYEBCpNoAwyf3Uy9xIRyIq8zzctUQ",
+  authDomain: metaEnv.VITE_FIREBASE_AUTH_DOMAIN || "amiable-card-6wrl4.firebaseapp.com",
+  projectId: metaEnv.VITE_FIREBASE_PROJECT_ID || "amiable-card-6wrl4",
+  storageBucket: metaEnv.VITE_FIREBASE_STORAGE_BUCKET || "amiable-card-6wrl4.firebasestorage.app",
+  messagingSenderId: metaEnv.VITE_FIREBASE_MESSAGING_SENDER_ID || "565471010242",
+  appId: metaEnv.VITE_FIREBASE_APP_ID || "1:565471010242:web:dea73a69f8d8d8aa624a5b"
 };
 
-const databaseId = "ai-studio-d848d1b6-20bf-4f6a-8f59-7111180e1d3d";
+const databaseId = metaEnv.VITE_FIREBASE_DATABASE_ID || "ai-studio-d848d1b6-20bf-4f6a-8f59-7111180e1d3d";
 
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore with custom databaseId since we are using a provisioned database
-export const db = getFirestore(app, databaseId);
+// Initialize Firestore with custom databaseId if provided, or default database if using "(default)"
+export const db = databaseId === "(default)" ? getFirestore(app) : getFirestore(app, databaseId);
 
 export const auth = getAuth(app);
 
