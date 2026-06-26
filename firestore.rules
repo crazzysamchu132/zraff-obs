@@ -1,81 +1,66 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Helper functions
+    // Bypass authentication restrictions since the frontend login system is completely removed
+    // and access is controlled via password on the client side.
     function isAuthenticated() {
-      return request.auth != null;
+      return true;
     }
     
     function hasRole(role) {
-      return isAuthenticated() && 
-             exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == role;
+      return true;
     }
     
     function isAdmin() {
-      return hasRole('admin');
+      return true;
     }
     
     function isManager() {
-      return hasRole('admin') || hasRole('manager');
+      return true;
     }
     
     function isOperator() {
-      return hasRole('admin') || hasRole('manager') || hasRole('operator');
+      return true;
     }
 
     // Users Collection
     match /users/{userId} {
-      allow read: if true; // Let viewers see names/profiles
-      allow create: if true; // Allow signup
-      allow update, delete: if (isAuthenticated() && request.auth.uid == userId) || isAdmin();
+      allow read, write: if true;
     }
 
     // Tournaments Collection
     match /tournaments/{tournamentId} {
-      allow read: if true;
-      allow create, update: if isManager();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
     // Teams Collection
     match /teams/{teamId} {
-      allow read: if true;
-      allow create, update: if isManager();
-      allow delete: if isAdmin() || isManager();
+      allow read, write: if true;
     }
 
     // Groups Collection
     match /groups/{groupId} {
-      allow read: if true;
-      allow create, update: if isManager();
-      allow delete: if isAdmin();
+      allow read, write: if true;
     }
 
     // Fixtures / Matches Collection
     match /fixtures/{fixtureId} {
-      allow read: if true;
-      allow create, update: if isOperator();
-      allow delete: if isManager();
+      allow read, write: if true;
     }
 
     // Settings Collection
     match /settings/{settingsId} {
-      allow read: if true;
-      allow write: if isOperator();
+      allow read, write: if true;
     }
 
     // Graphics Overlay Control Collection
     match /graphics/{graphicsId} {
-      allow read: if true;
-      allow write: if isOperator();
+      allow read, write: if true;
     }
 
     // System Logs Collection
     match /system_logs/{logId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update, delete: if isAdmin();
+      allow read, write: if true;
     }
   }
 }
