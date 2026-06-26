@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, query, collection, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { Tournament, UserProfile } from '../types';
 import { Radio, Copy, Check, ExternalLink, Settings, Film } from 'lucide-react';
@@ -26,11 +26,19 @@ export default function ObsPreview({ currentUser, activeTournament }: ObsPreview
   const triggerTestGraphics = async (type: string) => {
     try {
       // Find first match or mock match
-      const mockMatchId = `match_1_${activeTournament?.id || 'demo'}`;
+      let activeMatchId = `match_1_${activeTournament?.id || 'demo'}`;
+      
+      if (activeTournament) {
+        const q = query(collection(db, 'fixtures'), where('tournamentId', '==', activeTournament.id));
+        const snap = await getDocs(q);
+        if (!snap.empty) {
+          activeMatchId = snap.docs[0].id;
+        }
+      }
       
       await setDoc(doc(db, 'graphics', 'overlay_control'), {
         activeOverlay: type,
-        activeMatchId: mockMatchId,
+        activeMatchId: activeMatchId,
         alertDetails: {
           teamId: 'demo_team',
           playerName: 'Cristiano Ronaldo',
@@ -103,38 +111,122 @@ export default function ObsPreview({ currentUser, activeTournament }: ObsPreview
             </div>
 
             {currentUser.role !== 'viewer' && (
-              <div className="space-y-3 pt-2">
-                <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase block">3. QUICK GRAPHICS DRY-RUN</span>
-                <div className="grid grid-cols-2 gap-2" id="test-triggers">
-                  <button
-                    onClick={() => triggerTestGraphics('intro')}
-                    className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold transition"
-                    id="test-trigger-intro"
-                  >
-                    Test Intro
-                  </button>
-                  <button
-                    onClick={() => triggerTestGraphics('goal')}
-                    className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold transition"
-                    id="test-trigger-goal"
-                  >
-                    Test Goal Alert
-                  </button>
-                  <button
-                    onClick={() => triggerTestGraphics('substitution')}
-                    className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold transition"
-                    id="test-trigger-sub"
-                  >
-                    Test Sub Alert
-                  </button>
-                  <button
-                    onClick={() => triggerTestGraphics('none')}
-                    className="py-2 px-3 bg-red-600/10 hover:bg-red-600/15 border border-red-500/20 text-red-400 rounded-lg text-xs font-mono font-semibold transition"
-                    id="test-trigger-clear"
-                  >
-                    Clear Feed
-                  </button>
+              <div className="space-y-5 pt-2">
+                <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase block">3. LIVE BROADCAST OVERLAYS</span>
+                
+                {/* Broadcast / Fullscreen Scenes */}
+                <div className="space-y-1.5">
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest block">Broadcast Screens</span>
+                  <div className="grid grid-cols-2 gap-2" id="screens-triggers">
+                    <button
+                      onClick={() => triggerTestGraphics('intro')}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-intro"
+                    >
+                      <span>🎥 Intro Scene</span>
+                    </button>
+                    <button
+                      onClick={() => triggerTestGraphics('sponsor')}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-sponsor"
+                    >
+                      <span>⭐ Sponsor Logo</span>
+                    </button>
+                    <button
+                      onClick={() => triggerTestGraphics('group_draw')}
+                      className="py-2 px-3 bg-yellow-500/10 hover:bg-yellow-500/15 border border-yellow-500/20 text-yellow-400 rounded-lg text-xs font-mono font-bold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-groups-draw"
+                    >
+                      <span>📊 Groups Board</span>
+                    </button>
+                    <button
+                      onClick={() => triggerTestGraphics('group_tables')}
+                      className="py-2 px-3 bg-yellow-500/10 hover:bg-yellow-500/15 border border-yellow-500/20 text-yellow-400 rounded-lg text-xs font-mono font-bold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-groups-tables"
+                    >
+                      <span>📈 Groups Table</span>
+                    </button>
+                    <button
+                      onClick={() => triggerTestGraphics('fixture_announcement')}
+                      className="py-2 px-3 bg-blue-500/10 hover:bg-blue-500/15 border border-blue-500/20 text-blue-400 rounded-lg text-xs font-mono font-bold text-left transition flex items-center space-x-1.5 col-span-2"
+                      id="test-trigger-fixtures"
+                    >
+                      <span>📅 Fixture Bracket</span>
+                    </button>
+                    <button
+                      onClick={() => triggerTestGraphics('champion_celebration')}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold text-left transition flex items-center space-x-1.5 col-span-2"
+                      id="test-trigger-celebration"
+                    >
+                      <span>🏆 Champions Podium</span>
+                    </button>
+                  </div>
                 </div>
+
+                {/* Match overlays */}
+                <div className="space-y-1.5">
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest block">Live Match Screens</span>
+                  <div className="grid grid-cols-2 gap-2" id="match-screens-triggers">
+                    <button
+                      onClick={() => triggerTestGraphics('next_match')}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-nextmatch"
+                    >
+                      <span>⚔️ Next Match</span>
+                    </button>
+                    <button
+                      onClick={() => triggerTestGraphics('match_scoreboard')}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-scoreboard"
+                    >
+                      <span>🕒 Scoreboard</span>
+                    </button>
+                    <button
+                      onClick={() => triggerTestGraphics('half_time')}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-halftime"
+                    >
+                      <span>⏸️ Half Time Stats</span>
+                    </button>
+                    <button
+                      onClick={() => triggerTestGraphics('full_time')}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-fulltime"
+                    >
+                      <span>🏁 Full Time Stats</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Instant alerts */}
+                <div className="space-y-1.5">
+                  <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest block">Instant Overlays (Lower Thirds)</span>
+                  <div className="grid grid-cols-2 gap-2" id="alerts-triggers">
+                    <button
+                      onClick={() => triggerTestGraphics('goal')}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-goal"
+                    >
+                      <span>⚽ Goal Alert</span>
+                    </button>
+                    <button
+                      onClick={() => triggerTestGraphics('substitution')}
+                      className="py-2 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-mono font-semibold text-left transition flex items-center space-x-1.5"
+                      id="test-trigger-sub"
+                    >
+                      <span>🔄 Sub Alert</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Clear feed */}
+                <button
+                  onClick={() => triggerTestGraphics('none')}
+                  className="w-full py-2.5 bg-red-600/10 hover:bg-red-600/15 border border-red-500/20 text-red-400 rounded-xl text-xs font-mono font-bold tracking-wider transition uppercase"
+                  id="test-trigger-clear"
+                >
+                  ❌ Clear Overlay Graphics
+                </button>
               </div>
             )}
           </div>

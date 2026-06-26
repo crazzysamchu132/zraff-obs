@@ -597,6 +597,20 @@ export default function LiveConsole({ currentUser, matchId, onBackToBracket }: L
                   📊 Group Seeding
                 </button>
                 <button
+                  onClick={() => triggerBroadcastOverlay('group_tables')}
+                  className="py-2.5 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs text-slate-200 transition text-left"
+                  id="overlay-group-tables-btn"
+                >
+                  📈 Groups Table
+                </button>
+                <button
+                  onClick={() => triggerBroadcastOverlay('fixture_announcement')}
+                  className="py-2.5 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs text-slate-200 transition text-left"
+                  id="overlay-fixtures-btn"
+                >
+                  📅 Fixture Bracket
+                </button>
+                <button
                   onClick={() => triggerBroadcastOverlay('next_match')}
                   className="py-2.5 px-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs text-slate-200 transition text-left"
                   id="overlay-next-btn"
