@@ -589,14 +589,8 @@ function DrawGroupsLayout({ teams }: { teams: Team[] }) {
   return (
     <div className="grid grid-cols-4 gap-6 w-[1600px]" id="overlay-groups-board-grid">
       {groups.map((group) => {
-        const letter = group.name.split(' ')[1];
-        
-        // Resolve teams
-        const pos1TeamId = Object.keys(group.teamPositions).find(tid => group.teamPositions[tid] === 1);
-        const pos2TeamId = Object.keys(group.teamPositions).find(tid => group.teamPositions[tid] === 2);
-        
-        const team1 = teams.find(t => t.id === pos1TeamId);
-        const team2 = teams.find(t => t.id === pos2TeamId);
+        const capacity = (group as any).capacity || 2;
+        const positions = Array.from({ length: capacity }, (_, i) => i + 1);
 
         return (
           <motion.div
@@ -610,33 +604,39 @@ function DrawGroupsLayout({ teams }: { teams: Team[] }) {
             </h3>
 
             <div className="space-y-2.5">
-              {/* Pos 1 */}
-              <div className="flex items-center space-x-3 p-2 bg-white/5 border border-white/5 rounded-xl">
-                {team1 ? (
-                  <>
-                    {team1.logo ? (
-                      <img src={team1.logo} alt={team1.name} className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
-                    ) : null}
-                    <span className="font-display font-bold text-xs text-slate-200 truncate">{team1.name}</span>
-                  </>
-                ) : (
-                  <span className="text-[10px] font-mono text-slate-600 italic">EMPTY SEED SLOT</span>
-                )}
-              </div>
+              {positions.map((pos) => {
+                const teamId = Object.keys(group.teamPositions || {}).find(
+                  (tid) => group.teamPositions[tid] === pos
+                );
+                const team = teams.find((t) => t.id === teamId);
 
-              {/* Pos 2 */}
-              <div className="flex items-center space-x-3 p-2 bg-white/5 border border-white/5 rounded-xl">
-                {team2 ? (
-                  <>
-                    {team2.logo ? (
-                      <img src={team2.logo} alt={team2.name} className="w-5 h-5 object-contain" referrerPolicy="no-referrer" />
-                    ) : null}
-                    <span className="font-display font-bold text-xs text-slate-200 truncate">{team2.name}</span>
-                  </>
-                ) : (
-                  <span className="text-[10px] font-mono text-slate-600 italic">EMPTY SEED SLOT</span>
-                )}
-              </div>
+                return (
+                  <div
+                    key={pos}
+                    className="flex items-center space-x-3 p-2 bg-white/5 border border-white/5 rounded-xl"
+                  >
+                    {team ? (
+                      <>
+                        {team.logo ? (
+                          <img
+                            src={team.logo}
+                            alt={team.name}
+                            className="w-5 h-5 object-contain"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : null}
+                        <span className="font-display font-bold text-xs text-slate-200 truncate">
+                          {team.name}
+                        </span>
+                      </>
+                    ) : (
+                      <span className="text-[10px] font-mono text-slate-600 italic">
+                        EMPTY SEED SLOT
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         );
